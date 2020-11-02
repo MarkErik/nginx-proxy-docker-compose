@@ -1,1 +1,58 @@
-version "3.8"
+version: "3.8"
+
+services:
+
+  nginx-web:
+    image: jwilder/nginx-proxy:alpine
+    container_name: nginx-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./data/conf.d:/etc/nginx/conf.d
+      - ./data/vhost.d:/etc/nginx/vhost.d
+      - ./data/html:/usr/share/nginx/html
+      - ./data/certs:/etc/nginx/certs
+      - ./data/htpasswd:/etc/nginx/htpasswd
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - default
+      - outside
+    logging:
+      driver: json-file
+      options:
+        max-size: 4m
+        max-file: 10
+
+
+  nginx-letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion:latest
+    container_name: nginx-letsencrypt
+    restart: unless-stopped
+    volumes:
+      - ./data/conf.d:/etc/nginx/conf.d
+      - ./data/vhost.d:/etc/nginx/vhost.d
+      - ./data/html:/usr/share/nginx/html
+      - ./data/certs:/etc/nginx/certs:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      NGINX_PROXY_CONTAINER: nginx-web
+      DEFAULT_EMAIL: 
+    networks:
+      - default
+      - outside
+    logging:
+      driver: json-file
+      options:
+        max-size: 2m
+        max-file: 10
+
+networks:
+  default:
+    external:
+      name: proxy
+  outside:
+    external:
+      name: services
+      
