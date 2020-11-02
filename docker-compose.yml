@@ -15,7 +15,7 @@ services:
       - ./data/html:/usr/share/nginx/html
       - ./data/certs:/etc/nginx/certs
       - ./data/htpasswd:/etc/nginx/htpasswd
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
       - default
       - outside
