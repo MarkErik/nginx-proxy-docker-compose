@@ -6,7 +6,9 @@ RUN apt-get install -y fail2ban
 
 COPY entrypoint.sh /entrypoint.sh
 
-RUN chmod a+x /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+WORKDIR /etc/fail2ban
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD [ "fail2ban-server", "-f", "-x", "-v", "start" ]
