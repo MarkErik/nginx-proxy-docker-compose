@@ -53,13 +53,13 @@ services:
       context: Dockerfiles/fail2ban/
       dockerfile: Dockerfile
     container_name: fail2ban
-    volumes:
-      - /var/log/auth.log:/var/log/auth.log:ro
-    network_mode: "host"
     restart: always
+    network_mode: "host"
     cap_add:
       - NET_ADMIN
       - NET_RAW
+    volumes:
+      - /var/log:/var/log:ro
 
 
 networks:
