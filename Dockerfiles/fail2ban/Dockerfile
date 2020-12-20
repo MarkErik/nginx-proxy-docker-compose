@@ -2,7 +2,7 @@ FROM ubuntu:latest
 
 RUN apt-get update
 
-RUN apt-get install fail2ban -Y
+RUN apt-get install -y fail2ban
 
 COPY entrypoint.sh /entrypoint.sh
 
