@@ -48,6 +48,18 @@ services:
         max-size: "200k"
         max-file: "10"
 
+  fail2ban:
+    build:
+      context: Dockerfiles/fail2ban/
+      dockerfile: Dockerfile
+    container_name: fail2ban
+    network_mode: "host"
+    restart: always
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+
 networks:
   default:
     external:
