@@ -6,8 +6,6 @@ services:
 
   nginx-proxy:
     image: nginx:alpine
-    # labels:
-    #   com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
     container_name: nginx-proxy
     restart: unless-stopped
     ports:
@@ -41,7 +39,7 @@ services:
       - ./data/html:/usr/share/nginx/html
       - ./data/certs:/etc/nginx/certs:ro
       - ./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro
-      - /run/user/${MYUID}/docker.sock:/var/run/docker.sock
+      - /run/user/${MYUID}/docker.sock:/tmp/docker.sock
     networks:
       - proxy
       - services
