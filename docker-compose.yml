@@ -64,7 +64,7 @@ services:
       - ./data/acme:/etc/acme.sh
       - /run/user/${MYUID}/docker.sock:/var/run/docker.sock
     environment:
-    #  NGINX_PROXY_CONTAINER: nginx-web
+      NGINX_PROXY_CONTAINER: nginx-proxy
       DEFAULT_EMAIL: 
     networks:
       - proxy
