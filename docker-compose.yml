@@ -1,24 +1,50 @@
 version: "3.8"
 
+#MYUID="$(id -u)" docker-compose up
+
 services:
 
-  nginx-web:
-    image: jwilder/nginx-proxy:alpine
-    container_name: nginx-web
+  nginx-proxy:
+    image: nginx:alpine
+    # labels:
+    #   com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+    container_name: nginx-proxy
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     volumes:
+      - .data/conf:/etc/nginx/conf.d
+      - ./data/vhost.d:/etc/nginx/vhost.d
+      - ./data/html:/usr/share/nginx/html
+      - ./data/certs:/etc/nginx/certs:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500k"
+        max-file: "10"
+    networks:
+      - proxy
+      - services
+    
+
+  docker-gen:
+    image: jwilder/docker-gen
+    container_name: docker-gen
+    restart: unless-stopped
+    command: -notify-sighup nginx-proxy -watch -wait 5s:30s /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
+    labels:
+      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.docker_gen"
+    volumes:
       - ./data/conf.d:/etc/nginx/conf.d
       - ./data/vhost.d:/etc/nginx/vhost.d
       - ./data/html:/usr/share/nginx/html
-      - ./data/certs:/etc/nginx/certs
-      - ./data/htpasswd:/etc/nginx/htpasswd
-      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./data/certs:/etc/nginx/certs:ro
+      - ./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro
+      - /run/user/${MYUID}/docker.sock:/var/run/docker.sock
     networks:
-      - default
-      - outside
+      - proxy
+      - services
     logging:
       driver: "json-file"
       options:
@@ -26,22 +52,23 @@ services:
         max-file: "10"
 
 
-  nginx-letsencrypt:
+  nginx-le:
     image: jrcs/letsencrypt-nginx-proxy-companion:latest
-    container_name: nginx-letsencrypt
+    container_name: nginx-le
     restart: unless-stopped
     volumes:
       - ./data/conf.d:/etc/nginx/conf.d
       - ./data/vhost.d:/etc/nginx/vhost.d
       - ./data/html:/usr/share/nginx/html
       - ./data/certs:/etc/nginx/certs:rw
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/acme:/etc/acme.sh
+      - /run/user/${MYUID}/docker.sock:/var/run/docker.sock
     environment:
-      NGINX_PROXY_CONTAINER: nginx-web
+    #  NGINX_PROXY_CONTAINER: nginx-web
       DEFAULT_EMAIL: 
     networks:
-      - default
-      - outside
+      - proxy
+      - services
     logging:
       driver: "json-file"
       options:
@@ -49,9 +76,7 @@ services:
         max-file: "10"
 
 networks:
-  default:
-    external:
-      name: proxy
-  outside:
-    external:
-      name: services
+  proxy:
+    external: true
+  services:
+    external: true
