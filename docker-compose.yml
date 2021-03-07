@@ -12,7 +12,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - .data/conf:/etc/nginx/conf.d
+      - ./data/conf.d:/etc/nginx/conf.d
       - ./data/vhost.d:/etc/nginx/vhost.d
       - ./data/html:/usr/share/nginx/html
       - ./data/certs:/etc/nginx/certs:ro
