@@ -29,17 +29,13 @@ services:
     image: jrcs/letsencrypt-nginx-proxy-companion:latest
     container_name: nginx-le
     restart: unless-stopped
+    volumes_from: 
+      - nginx-proxy
     volumes:
-      - ./data/conf.d:/etc/nginx/conf.d
-      - ./data/vhost.d:/etc/nginx/vhost.d
-      - ./data/html:/usr/share/nginx/html
-      - ./data/dhparam:/etc/nginx/dhparam
       - ./data/certs:/etc/nginx/certs:rw
       - ./data/acme:/etc/acme.sh
       - /run/user/${MYUID}/docker.sock:/var/run/docker.sock
     environment:
-      NGINX_PROXY_CONTAINER: nginx-proxy
-      NGINX_DOCKER_GEN_CONTAINER: docker-gen
       DEFAULT_EMAIL: 
     networks:
       - proxy
