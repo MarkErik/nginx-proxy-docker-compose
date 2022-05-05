@@ -1,20 +1,14 @@
-version: "3.9"
-
-#MYUID="$(id -u)" docker-compose up
-
 services:
-
   nginx-proxy:
-    image: jwilder/nginx-proxy:alpine
+    image: nginxproxy/nginx-proxy:alpine
     container_name: nginx-proxy
     restart: unless-stopped
     volumes:
+      - ./data/certs:/etc/nginx/certs:ro
       - ./data/conf.d:/etc/nginx/conf.d
       - ./data/vhost.d:/etc/nginx/vhost.d
       - ./data/html:/usr/share/nginx/html
-      - ./data/dhparam:/etc/nginx/dhparam
-      - ./data/certs:/etc/nginx/certs:ro
-      - /run/user/${MYUID}/docker.sock:/tmp/docker.sock
+      - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
       - proxy
       - services
@@ -25,16 +19,16 @@ services:
         max-file: "10"
 
 
-  nginx-le:
-    image: jrcs/letsencrypt-nginx-proxy-companion:latest
-    container_name: nginx-le
+  acme-companion:
+    image: nginxproxy/acme-companion:latest
+    container_name: acme-companion
     restart: unless-stopped
     volumes_from: 
       - nginx-proxy
     volumes:
       - ./data/certs:/etc/nginx/certs:rw
       - ./data/acme:/etc/acme.sh
-      - /run/user/${MYUID}/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       DEFAULT_EMAIL: 
     networks:
