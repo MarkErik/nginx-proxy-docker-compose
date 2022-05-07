@@ -1,3 +1,5 @@
+#MYUID="$(id -u)" docker compose up
+
 services:
   nginx-proxy:
     image: nginxproxy/nginx-proxy:alpine
@@ -8,7 +10,7 @@ services:
       - ./data/conf.d:/etc/nginx/conf.d
       - ./data/vhost.d:/etc/nginx/vhost.d
       - ./data/html:/usr/share/nginx/html
-      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - /run/user/${MYUID}/docker.sock:/tmp/docker.sock:ro
     networks:
       - proxy
       - services
@@ -28,7 +30,7 @@ services:
     volumes:
       - ./data/certs:/etc/nginx/certs:rw
       - ./data/acme:/etc/acme.sh
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /run/user/${MYUID}/docker.sock:/var/run/docker.sock:ro
     environment:
       DEFAULT_EMAIL: 
     networks:
